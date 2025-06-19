@@ -1,4 +1,6 @@
-# ProvesKit RP2350 v5a CircuitPython Flight Software
+# OBC-V2
+
+OBC-V2 integrates the original OBC work into the ProvesKit RP2350 v5a CircuitPython Flight Software
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![CI](https://github.com/proveskit/CircuitPython_RP2350_v5a/actions/workflows/ci.yaml/badge.svg)
