@@ -1,13 +1,8 @@
 {
-    "python.languageServer": "Pylance",
-    "python.analysis.diagnosticSeverityOverrides": {
-        "reportMissingModuleSource": "none",
-        "reportShadowedImports": "none"
-    },
-    "python.analysis.extraPaths": [
-        "",
-        "c:\\Users\\Dumbl\\.vscode\\extensions\\wmerkens.vscode-circuitpython-v2-0.3.3\\stubs",
-        "c:\\Users\\Dumbl\\AppData\\Roaming\\Code\\User\\globalStorage\\wmerkens.vscode-circuitpython-v2\\bundle\\20250618\\adafruit-circuitpython-bundle-py-20250618\\lib"
+    "files.eol": "\n",
+    "python.testing.pytestArgs": [
+        "tests/unit"
     ],
-    "circuitpython.board.version": null
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
 }
