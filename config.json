@@ -1,0 +1,49 @@
+{
+"cubesat_name": "HUCSat",
+"last_battery_temp": 20.0,
+"sleep_duration": 30,
+"detumble_enable_z": true,
+"detumble_enable_x":true,
+"detumble_enable_y": true,
+"jokes": [
+        "TODO: ADD JOKES HERE"
+    ],
+"debug": true,
+"heating": false,
+"normal_temp": 20,
+"normal_battery_temp": 1,
+"normal_micro_temp": 20,
+"normal_charge_current": 0.5,
+"normal_battery_voltage": 6.9,
+"critical_battery_voltage": 6.6,
+"battery_voltage": 5.2,
+"current_draw": 240.5,
+"reboot_time": 3600,
+"longest_allowable_sleep_time": 360,
+"turbo_clock": false,
+"radio": {
+    "license": "",
+    "receiver_id": 250,
+    "sender_id": 251,
+    "start_time": 80000,
+    "transmit_frequency": 437.4,
+    "lora": {
+        "ack_delay": 0.2,
+        "coding_rate": 8,
+        "cyclic_redundancy_check": true,
+        "max_output": true,
+        "spreading_factor": 8,
+        "transmit_power": 23
+    },
+    "fsk": {
+        "broadcast_address": 255,
+        "node_address": 1,
+        "modulation_type": 0
+    }
+},
+"super_secret_code": "TODO: ADD SUPER SECRET CODE",
+"repeat_code": "RP",
+"joke_reply": [
+        "TODO: ADD JOKE REPLIES HERE"
+    ]
+}
