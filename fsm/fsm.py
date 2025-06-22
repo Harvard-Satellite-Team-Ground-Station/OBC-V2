@@ -36,7 +36,7 @@ class FSM:
         """
         This function is called when we switch states from execute_fsm()
         """
-        print(f"✅ {self.curr_state_name} complete → {new_state_name}")
+        print(f"New State: {new_state_name}")
 
         # Stop current state's background task
         if self.curr_state_run_asyncio_task is not None:

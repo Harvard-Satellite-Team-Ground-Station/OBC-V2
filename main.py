@@ -139,6 +139,7 @@ try:
 
     # Begin An Initial Bootup
     def initial_boot():
+        fsm_obj.set_state("bootup")
         watchdog.pet()
         f.beacon()
         watchdog.pet()
@@ -162,25 +163,15 @@ try:
 
     # Begin Main (Which Will Be Executed In a Loop)
     def main():
-
         fsm_obj.execute_fsm_step()
-
         f.beacon()
-
         f.listen_loiter()
-
         f.state_of_health()
-
         f.listen_loiter()
-
         watchdog.pet()
-
         f.listen_loiter()
-
         f.listen_loiter()
-
         f.joke()
-
         f.listen_loiter()
 
     def critical_power_operations():

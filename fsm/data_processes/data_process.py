@@ -37,7 +37,6 @@ class DataProcess():
         except RuntimeError as e:
             print("Asyncio loop already running:", e)
 
-
     async def run_all_data(self):
         """
         Run all the data-gathering functions in an infinite loop.
