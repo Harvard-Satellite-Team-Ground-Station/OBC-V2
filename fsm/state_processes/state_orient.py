@@ -1,6 +1,7 @@
 # state_orient.py
 
 
+
 # ++++++++++++++ Imports/Installs ++++++++++++++ #
 import asyncio
 
@@ -8,15 +9,9 @@ import asyncio
 
 # ++++++++++++++ Functions: Helper ++++++++++++++ #
 class StateOrient:
-    def __init__(self, shared_data):
-        self.data = shared_data
+    def __init__(self, dp_obj):
+        self.dp_obj = dp_obj
         self._running = False
-
-    def update(self):
-        """
-        This function gets executed each time the FSM is called 
-        """
-        pass
     
     async def run(self):
         self._running = True

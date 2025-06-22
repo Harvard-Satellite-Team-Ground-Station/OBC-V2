@@ -15,16 +15,16 @@ from fsm.state_processes.state_detumble import StateDetumble
 
 # ++++++++++++++++++++ Class Definition ++++++++++++++++++++ #
 class FSM:
-    def __init__(self, data):
-        self.data = data # see DataProcess Class for this data schema
+    def __init__(self, dp_obj):
+        self.dp_obj = dp_obj    # object of type DataProcess
         self.state_objects = {
-            "bootup"    : StateBootup(self.data),
-            "detumble"  : StateDetumble(self.data),
-            "charge"    : StateCharge(self.data),
-            "antennas"  : StateAntennas(self.data),
-            "comms"     : StateComms(self.data),
-            "deploy"    : StateDeploy(self.data),
-            "orient"    : StateOrient(self.data),
+            "bootup"    : StateBootup(dp_obj),
+            "detumble"  : StateDetumble(dp_obj),
+            "charge"    : StateCharge(dp_obj),
+            "antennas"  : StateAntennas(dp_obj),
+            "comms"     : StateComms(dp_obj),
+            "deploy"    : StateDeploy(dp_obj),
+            "orient"    : StateOrient(dp_obj),
         }
         self.curr_state_name = "bootup"
         self.curr_state_object = self.state_objects["bootup"]
@@ -48,24 +48,17 @@ class FSM:
         self.curr_state_object = self.state_objects[new_state_name]
         self.curr_state_run_asyncio_task = asyncio.create_task(self.curr_state_object.run())
 
-    def update(self, data):
-        """
-        Update the data from DataProcess object for an upcoming fsm step
-        """
-        self.data = data
-
     def execute_fsm_step(self):
         """
         This function runs a single execution of the finite state machine (fsm)
         It checks its current state and data points and sees if we 
         need to change state, take action, etc.
+        Note: because we pass in db_obj, its data variable will update 
+        automatically if any changes are made for that db_obj
         """
-    
-        # Update current state logic
-        self.curr_state_object.update()
         
         # Emergency override: low battery
-        if self.data["data_bp"] <= 20 and self.current_state_name != "charge":
+        if self.dp_obj.data["data_bp"] <= 20 and self.current_state_name != "charge":
             self.set_state("charge")
             return
 
@@ -75,29 +68,29 @@ class FSM:
             return
 
         # Detumble → Charge
-        if self.current_state_name == "detumble" and self.data["data_imu_av_magnitude"] <= 0:
+        if self.current_state_name == "detumble" and self.dp_obj.data["data_imu_av_magnitude"] <= 0:
             self.set_state("charge")
             return
 
         # Charge → Antennas
-        if self.current_state_name == "charge" and self.data["data_bp"] >= 75:
+        if self.current_state_name == "charge" and self.dp_obj.data["data_bp"] >= 75:
             self.set_state("antennas")
             return
 
         # Antennas → Comms
         if self.current_state_name == "antennas":
-            if self.data["data_bp"] >= 50:
+            if self.dp_obj.data["data_bp"] >= 50:
                 self.checkpoint = True
-            if self.checkpoint and all(val > 90 for val in self.data["imu_pos"]):
+            if self.checkpoint and all(val > 90 for val in self.dp_obj.data["imu_pos"]):
                 self.checkpoint = False
                 self.set_state("comms")
                 return
 
         # Comms → Deploy or Orient
         if self.current_state_name == "comms":
-            if self.data["data_bp"] >= 50:
+            if self.dp_obj.data["data_bp"] >= 50:
                 self.checkpoint = True
-            if self.checkpoint and self.data["data_imu_av_magnitude"] <= 1:
+            if self.checkpoint and self.dp_obj.data["data_imu_av_magnitude"] <= 1:
                 self.checkpoint = False
                 if not self.deployed_already:
                     self.deployed_already = True
@@ -107,13 +100,13 @@ class FSM:
                 return
 
         # Deploy → Orient
-        if self.current_state_name == "deploy" and self.data["data_bp"] >= 30:
+        if self.current_state_name == "deploy" and self.dp_obj.data["data_bp"] >= 30:
             self.set_state("orient")
             return
 
         # Orient → Comms
         if self.current_state_name == "orient":
-            if all(val > 90 for val in self.data["imu_pos"]):
+            if all(val > 90 for val in self.dp_obj.data["imu_pos"]):
                 self.set_state("comms")
                 return
         
