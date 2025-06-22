@@ -1,47 +1,50 @@
-# This is where the magic happens!
-# This file is executed on every boot (including wake-boot from deepsleep)
-# Created By: Michael Pham
-import asyncio
+# main.py
+
 
 """
+This is where the magic happens!
+This file is executed on every boot (including wake-boot from deepsleep)
+Created By: Michael Pham
 Built for the PySquared V5a FC Board
 Version: X.X.X
 Published:
 """
 
+
+
+# ++++++++++++++++++ Imports and Installs ++++++++++++++++++ #
 import gc
 import os
 import time
-
 import board
+import asyncio
 import digitalio
 import microcontroller
-
-import lib.pysquared.functions as functions
-import lib.pysquared.nvm.register as register
-from lib.pysquared.cdh import CommandDataHandler
-from lib.pysquared.config.config import Config
-from lib.pysquared.hardware.busio import _spi_init, initialize_i2c_bus
-from lib.pysquared.hardware.digitalio import initialize_pin
-from lib.pysquared.hardware.imu.manager.lsm6dsox import LSM6DSOXManager
-from lib.pysquared.hardware.magnetometer.manager.lis2mdl import LIS2MDLManager
-from lib.pysquared.hardware.radio.manager.sx1280 import SX1280Manager
-from lib.pysquared.logger import Logger
-from lib.pysquared.nvm.counter import Counter
-from lib.pysquared.nvm.flag import Flag
-from lib.pysquared.rtc.manager.microcontroller import MicrocontrollerManager
-from lib.pysquared.satellite import Satellite
-from lib.pysquared.sleep_helper import SleepHelper
-from lib.pysquared.watchdog import Watchdog
 from fsm.fsm import FSM
-from fsm.data_processes.data_process import DataProcess
 from version import __version__
+from lib.pysquared.nvm.flag import Flag
+from lib.pysquared.logger import Logger
+import lib.pysquared.functions as functions
+from lib.pysquared.watchdog import Watchdog
+from lib.pysquared.satellite import Satellite
+import lib.pysquared.nvm.register as register
+from lib.pysquared.nvm.counter import Counter
+from lib.pysquared.config.config import Config
+from lib.pysquared.cdh import CommandDataHandler
+from lib.pysquared.sleep_helper import SleepHelper
+from fsm.data_processes.data_process import DataProcess
+from lib.pysquared.hardware.digitalio import initialize_pin
+from lib.pysquared.hardware.radio.manager.sx1280 import SX1280Manager
+from lib.pysquared.hardware.busio import _spi_init, initialize_i2c_bus
+from lib.pysquared.hardware.imu.manager.lsm6dsox import LSM6DSOXManager
+from lib.pysquared.rtc.manager.microcontroller import MicrocontrollerManager
+from lib.pysquared.hardware.magnetometer.manager.lis2mdl import LIS2MDLManager
 
+
+# ++++++++++++++++++ Object Initialization ++++++++++++++++++ #
+dp_obj = DataProcess()
+fsm_obj = FSM(dp_obj.data)
 rtc = MicrocontrollerManager()
-
-# NOTE Changes
-dp = DataProcess()
-fsm_obj = FSM(dp.data)
 
 logger: Logger = Logger(
     error_counter=Counter(index=register.ERRORCNT),
@@ -56,6 +59,8 @@ logger.info(
 
 loiter_time: int = 15
 
+
+# +++++++++++++++++++++++ Try Blocks +++++++++++++++++++++++ #
 try:
     for i in range(loiter_time):
         logger.info(f"Code Starting in {loiter_time-i} seconds")
@@ -169,24 +174,13 @@ try:
         watchdog.pet()
         radio.send(IMUData)
 
-    # NOTE Changes
-    # Start the background asyncio loop before the main power loop
-    async def background_tasks():
-        await dp.run_all_data()
-
-    # Must be called once at startup
-    def start_background_loop():
-        try:
-            asyncio.create_task(background_tasks())
-        except RuntimeError as e:
-            print("Asyncio loop already running:", e)
-
-    start_background_loop()
+    dp_obj.start_run_all_data()
 
     def main():
 
-        # NOTE Change
-        fsm_obj.execute_fsm()
+        fsm_obj.update(dp_obj.data)
+
+        fsm_obj.execute_fsm_step()
 
         f.beacon()
 
@@ -220,7 +214,7 @@ try:
 
         sleep_helper.short_hibernate()
 
-    ######################### MAIN LOOP ##############################
+    # +++++++++++++++++++++++ Main Loop +++++++++++++++++++++++ #
     try:
         while True:
             # L0 automatic tasks no matter the battery level

@@ -1,6 +1,9 @@
-import asyncio
+# fsm.py
 
-# Placeholder for state classes
+
+
+# ++++++++++++++++++ Imports and Installs ++++++++++++++++++ #
+import asyncio
 from fsm.state_processes.state_comms import StateComms
 from fsm.state_processes.state_deploy import StateDeploy
 from fsm.state_processes.state_bootup import StateBootup
@@ -10,44 +13,29 @@ from fsm.state_processes.state_antennas import StateAntennas
 from fsm.state_processes.state_detumble import StateDetumble
 
 
-
-"""
-Data we need to monitor:
-- Battery percentage
-- IMU acceleration velocity
-- Data startracker position
-
-Pysquared, where we can get this data:
-- 
-"""
-
-
-
+# ++++++++++++++++++++ Class Definition ++++++++++++++++++++ #
 class FSM:
-    def __init__(self, shared_data):
-        self.data = shared_data # see DataProcess Class for this data schema
-
+    def __init__(self, data):
+        self.data = data # see DataProcess Class for this data schema
         self.state_objects = {
-            "bootup": StateBootup(self.data),
-            "detumble": StateDetumble(self.data),
-            "charge": StateCharge(self.data),
-            "antennas": StateAntennas(self.data),
-            "comms": StateComms(self.data),
-            "deploy": StateDeploy(self.data),
-            "orient": StateOrient(self.data),
+            "bootup"    : StateBootup(self.data),
+            "detumble"  : StateDetumble(self.data),
+            "charge"    : StateCharge(self.data),
+            "antennas"  : StateAntennas(self.data),
+            "comms"     : StateComms(self.data),
+            "deploy"    : StateDeploy(self.data),
+            "orient"    : StateOrient(self.data),
         }
         self.curr_state_name = "bootup"
         self.curr_state_object = self.state_objects["bootup"]
         self.curr_state_run_asyncio_task = None
-
         self.deployed_already = False
         self.checkpoint = False
 
-
-
-    # ++++++++++++++ Global Variables ++++++++++++++ #
-
     def set_state(self, new_state_name):
+        """
+        This function is called when we switch states from execute_fsm()
+        """
         print(f"✅ {self.current_state_name} complete → {new_state_name}")
 
         # Stop current state's background task
@@ -60,8 +48,13 @@ class FSM:
         self.curr_state_object = self.state_objects[new_state_name]
         self.curr_state_run_asyncio_task = asyncio.create_task(self.curr_state_object.run())
 
+    def update(self, data):
+        """
+        Update the data from DataProcess object for an upcoming fsm step
+        """
+        self.data = data
 
-    def execute_fsm(self):
+    def execute_fsm_step(self):
         """
         This function runs a single execution of the finite state machine (fsm)
         It checks its current state and data points and sees if we 

@@ -1,6 +1,7 @@
 # data_process.py
 
 
+
 # ++++++++++++++++++ Imports and Installs ++++++++++++++++++ #
 import time
 import asyncio
@@ -25,15 +26,29 @@ class DataProcess():
             "data_imu_pos" : [0.0,0.0,0.0]      # imu position
         }
 
+    def start_run_all_data(self):
+        """
+        This schedules a coroutine (a program that can be paused/resumed infinitely,
+        allowing for scheduled concurrency).  Specifically, it schedules the 
+        run_all_data function
+        """
+        try:
+            asyncio.create_task(self.run_all_data())
+        except RuntimeError as e:
+            print("Asyncio loop already running:", e)
+
+
     async def run_all_data(self):
         """
-        Run all the data-gathering functions concurrently.
+        Run all the data-gathering functions in an infinite loop.
         """
-        await asyncio.gather(
-            self.get_data_bp(),
-            self.get_data_imu_av(),
-            self.get_data_position()
-        )   
+        while True:
+            await asyncio.sleep(0.1) 
+            await asyncio.gather(
+                self.get_data_bp(),
+                self.get_data_imu_av(),
+                self.get_data_position()
+            )   
 
     async def get_data_bp(self):
         """
