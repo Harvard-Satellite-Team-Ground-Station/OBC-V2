@@ -17,7 +17,6 @@ import gc
 import os
 import time
 import board
-import asyncio
 import digitalio
 import microcontroller
 from fsm.fsm import FSM
@@ -54,7 +53,7 @@ logger.info(
 )
 
 dp_obj = DataProcess()
-fsm_obj = FSM(dp_obj)
+fsm_obj = FSM(dp_obj, logger)
 rtc = MicrocontrollerManager()
 loiter_time: int = 15
 

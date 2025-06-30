@@ -9,31 +9,33 @@ import asyncio
 
 # ++++++++++++++ Functions: Helper ++++++++++++++ #
 class StateBootup:
-    def __init__(self, dp_obj):
+    def __init__(self, dp_obj, logger):
         """
         Initialize the class object
         """
         self.dp_obj = dp_obj
-        self._done = False
-        self._running = False
+        self.logger = logger
+        self.done = False
+        self.running = False
     
     async def run(self):
         """
         Run the deployment sequence asynchronously
         """
-        self._running = True
+        self.running = True
         # TODO: tasks
         await asyncio.sleep(10)
-        self._done = True
+        self.done = True
 
     def stop(self):
         """
-        Manually stop the run()
+        Used by FSM to manually stop run()
         """
-        self._running = False
+        self.running = False
 
     def is_done(self):
         """
-        Check if the run() completed on its own
+        Checked by FSM to see if the run() completed on its own
+        If it did complete, it shuts down the async task run()
         """
-        return self._done
+        return self.done

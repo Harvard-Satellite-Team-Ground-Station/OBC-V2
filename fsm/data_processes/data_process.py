@@ -6,6 +6,7 @@
 import time
 import asyncio
 from lib.pysquared.protos.imu import IMUProto
+from lib.pysquared.protos.magnetometer import MagnetometerProto
 from lib.pysquared.protos.power_monitor import PowerMonitorProto
 
 
@@ -17,13 +18,15 @@ class DataProcess():
 
     def __init__(self):
         self.protos_power_monitor = PowerMonitorProto()
+        self.protos_magnetometer = MagnetometerProto()
         self.protos_imu = IMUProto()
         self.last_imu_time = time.monotonic()
         self.data = {
-            "data_bp" : 0.0,                    # battery percentage
-            "data_imu_av" : [0.0,0.0,0.0],      # imu angular velocity [ax, ay, az] in rad/s²
-            "data_imu_av_magnitude" : 0.0,      # imu angular velocity magnitude (Euclidian norm aka length of data_imu_av vector)
-            "data_imu_pos" : [0.0,0.0,0.0]      # imu position
+            "data_bp" : 0.0,                            # battery percentage
+            "data_imu_av" : [0.0,0.0,0.0],              # imu angular velocity [ax, ay, az] in rad/s²
+            "data_imu_av_magnitude" : 0.0,              # imu angular velocity magnitude (Euclidian norm aka length of data_imu_av vector)
+            "data_imu_pos" : [0.0,0.0,0.0],             # imu position
+            "data_magnetometer_vector" : [0.0,0.0,0.0]  # magnetometer vector
         }
 
     def start_run_all_data(self):
@@ -46,7 +49,8 @@ class DataProcess():
             await asyncio.gather(
                 self.get_data_bp(),
                 self.get_data_imu_av(),
-                self.get_data_position()
+                self.get_data_magnetometer_vector(),
+                self.get_data_position(),
             )   
 
     async def get_data_bp(self):
@@ -81,6 +85,12 @@ class DataProcess():
         magnitude = (ωx**2 + ωy**2 + ωz**2) ** 0.5
         self.data["data_imu_av_magnitude"] = magnitude
         await asyncio.sleep(1)
+
+    async def get_data_magnetometer_vector(self):
+        """
+        Get magnetometer vector
+        """
+        return self.protos_magnetometer.get_vector()
 
     async def get_data_position(self):
         # TODO

@@ -3,42 +3,53 @@
 
 
 # ++++++++++++++ Imports/Installs ++++++++++++++ #
+import board
 import asyncio
-from lib.pysquared.protos.burnwire import BurnwireProto
-
+import digitalio
+from lib.pysquared.hardware.digitalio import initialize_pin
+from lib.pysquared.hardware.burnwire.manager.burnwire import BurnwireManager
 
 
 # ++++++++++++++ Functions: Helper ++++++++++++++ #
 class StateDeploy:
-    def __init__(self, dp_obj):
-        """
-        Initialize the class object
-        """
+    def __init__(self, dp_obj, logger):
         self.dp_obj = dp_obj
-        self.protos_burnwire = BurnwireProto()
-        self._done = False
-        self._running = False
+        self.logger = logger
+        self.burnwire_heater = initialize_pin(logger, 
+                                              board.DECIDE_THE_PIN, 
+                                              digitalio.Direction.OUTPUT, 
+                                              False)
+        self.burnwire1_fire = initialize_pin(logger, 
+                                             board.DECIDE_THE_PIN, 
+                                             digitalio.Direction.OUTPUT, 
+                                             False)
+        self.burnwire = BurnwireManager(self.logger,
+                                        self.burnwire_heater,
+                                        self.burnwire1_fire)
+        self.burn_duration = 5
+        self.finished_burn = False
+        self.running = False
+        self.done = False
     
     async def run(self):
-        """
-        Run the deployment sequence asynchronously
-        """
-        # Step 0: set correct parameters
-        self._running = True
-        burn_duration = 10
-        # Step 1: burn the wire to deploy the antenna
-        self.protos_burnwire.burn(timeout_duration=burn_duration)
-        await asyncio.sleep(burn_duration)
-        self._done = True
-
+        self.running = True
+        while self.running:
+            await asyncio.sleep(2)
+            # Burn the wire if not already done to release the payload
+            if not self.finished_burn:
+                self.burnwire.burn(self.burn_duration)
+                self.finished_burn = True
+            self.done = True
+            
     def stop(self):
         """
-        Manually stop the run()
+        Used by FSM to manually stop run()
         """
-        self._running = False
+        self.running = False
 
     def is_done(self):
         """
-        Check if the run() completed on its own
+        Checked by FSM to see if the run() completed on its own
+        If it did complete, it shuts down the async task run()
         """
-        return self._done
+        return self.done

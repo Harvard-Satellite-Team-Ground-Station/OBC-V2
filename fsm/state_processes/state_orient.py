@@ -10,14 +10,31 @@ import asyncio
 # ++++++++++++++ Functions: Helper ++++++++++++++ #
 class StateOrient:
     def __init__(self, dp_obj):
+        """
+        Initialize the class object
+        """
         self.dp_obj = dp_obj
-        self._running = False
+        self.running = False
+        self.done = False
     
     async def run(self):
-        self._running = True
-        while self._running:
-            # TODO: do background tasks
+        """
+        Run the deployment sequence asynchronously
+        """
+        self.running = True
+        while self.running:
             await asyncio.sleep(2)
+            # TODO: do background tasks
 
     def stop(self):
-        self._running = False
+        """
+        Used by FSM to manually stop run()
+        """
+        self.running = False
+
+    def is_done(self):
+        """
+        Checked by FSM to see if the run() completed on its own
+        If it did complete, it shuts down the async task run()
+        """
+        return self.done
