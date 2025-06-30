@@ -9,8 +9,9 @@ import asyncio
 
 # ++++++++++++++ Functions: Helper ++++++++++++++ #
 class StateComms:
-    def __init__(self, dp_obj):
+    def __init__(self, dp_obj, logger):
         self.dp_obj = dp_obj
+        self.logger = logger
         self.running = False
         self.done = True
     
